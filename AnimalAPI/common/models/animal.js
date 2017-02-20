@@ -8,29 +8,18 @@ module.exports = function(Animal) {
 
 	Animal.observe('access', function(context) {
 		return Promise.all([
-			fetch('Bears'),
-			fetch('Cats'),
-		]).spread(bears, cats) => {
+			fetch('http://0.0.0.0:5000/api/Bears'),
+			fetch('http://0.0.0.0:6000/api/Cats'),
+		]).spread((bears, cats) => {
 			var allData = [].concat(bears).concat(cats);
 			return updateAnimals(allData);
-		};
+		});
 	});
-	
-	function fetch(urlPath) {
-		if (urlPath === "Bears") {
-			return request({
-				uri: 'http://0.0.0.0:5000/api/' + urlPath,
-				json: true
-			});
-		} else {
-			return request({
-				uri: 'http://0.0.0.0:6000/api/' + urlPath,
-				json: true
-			});
-		}
-		
+
+	function fetch(url) {
+		return request({uri: url, json: true});
 	}
-	
+
 	function updateAnimals(list) {
 		return Promise.all(list.map(animalJSON => {
 			let photoURL = animalJSON.photoURL;
@@ -38,13 +27,13 @@ module.exports = function(Animal) {
 			let plural = animalJSON.plural;
 			let animalType = animalJSON.animalType;
 			return Animal.create({
-				"photoURL": photoURL, 
-				"looksFriendly": looksFriendly, 
+				"photoURL": photoURL,
+				"looksFriendly": looksFriendly,
 				"plural": plural,
 				"animalType": animalType
 			}).then(null, err => {
 				// detect "photoURL" is not unique error and ignore it
-				let isDuplicate = // TODO;
+				let isDuplicate = false; // TODO
 				if (isDuplicate) return; // ignore the error
 				// else report the original error and fail the operation
 				return Promise.reject(err);
