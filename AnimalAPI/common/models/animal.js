@@ -18,28 +18,30 @@ module.exports = function(Animal) {
 		return request({uri: url, json: true});
 	}
 
-	function updateAnimals(list) {
-		return Promise.all(list.map(animalJSON => {
-			let photoURL = animalJSON.photoURL;
-			let looksFriendly = animalJSON.looksFriendly;
-			let plural = animalJSON.plural;
-			let animalType = animalJSON.animalType;
-			return Animal.create({
-				"photoURL": photoURL,
-				"looksFriendly": looksFriendly,
-				"plural": plural,
-				"animalType": animalType
-			}).then(null, err => {
-				console.log("Should see something here.");
-				// detect "photoURL" is not unique error and ignore it
-				Animal.find({notify:false}, function(err, animals) {
-					// check animals here to filter out duplicates
-				});
-				let isDuplicate = false; // TODO
-				if (isDuplicate) return; // ignore the error
-				// else report the original error and fail the operation
-				return Promise.reject(err);
+	function updateAnimals(newAnimals) {
+		return Animal.find({}, {notify: false})
+			.then(cachedAnimals => {
+				let lookup = Object.create(null);
+				for (let animal of cachedAnimals) {
+					lookup[animal.photoURL] = true;
+				}
+				return newAnimals.filter(animal => !(animal.photoURL in lookup));
+			})
+			.then(animalsToAdd => {
+				return Promise.all(animalsToAdd.map(addAnimalToCache));
 			});
-		}));
+	}
+
+	function addAnimalToCache(animalJSON) {
+		let photoURL = animalJSON.photoURL;
+		let looksFriendly = animalJSON.looksFriendly;
+		let plural = animalJSON.plural;
+		let animalType = animalJSON.animalType;
+		return Animal.create({
+			"photoURL": photoURL,
+			"looksFriendly": looksFriendly,
+			"plural": plural,
+			"animalType": animalType
+		});
 	}
 };
