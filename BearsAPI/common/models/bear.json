@@ -1,0 +1,32 @@
+{
+  "name": "Bear",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "photoURL": {
+      "type": "string",
+      "required": true
+    },
+    "looksFriendly": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "plural": {
+      "type": "boolean",
+      "required": true
+    },
+    "animalType": {
+      "type": "string",
+      "required": true,
+      "default": "Bear"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
